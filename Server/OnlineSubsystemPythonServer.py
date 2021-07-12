@@ -69,6 +69,7 @@ class MasterServer(object):
             server.pwprotected = pwprotected
             server.gamemode = gamemode
             server.timeoflastheartbeat = int(time.time())
+            """
             try:
                 r = requests.get('http://' + cherrypy.request.remote.ip + ':' + port, timeout=2)
             except requests.exceptions.ConnectTimeout:
@@ -77,6 +78,7 @@ class MasterServer(object):
                     return json.dumps({'error' : True, 'message' : 'Unable to connect to server [%s %s:%s]. Please verify your ports are forwarded and your firewall is not blocking the game. Your server will not be visible in the Server Browser.' % (server.name, server.ip, server.port)})
             except requests.exceptions.ConnectionError:
                 pass
+            """
 
             self.serverlist.append(server)
             return json.dumps({'error' : False, 'message' : 'Sucessfully added your server [%s %s:%s] to the server browser.' % (name, cherrypy.request.remote.ip, port), 'heartbeat' : self.time_between_heartbeats })
