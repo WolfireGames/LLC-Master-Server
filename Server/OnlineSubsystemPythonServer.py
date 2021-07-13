@@ -29,10 +29,12 @@ class Server(object):
         self.pwprotected = False
         self.gamemode = ''
         self.timeoflastheartbeat = 0
-		
+        
      def __eq__(self, other):
         if isinstance(other, self.__class__):
-            return self.name== other.name and self.port == other.port
+            print("Name:{}".format(self.name == other.name))
+            print("Port:{}".format(self.port == other.port))
+            return self.name == other.name and self.port == other.port
         else:
             return False
 
@@ -125,10 +127,11 @@ class MasterServer(object):
         return json.dumps({'error' : False, 'message' : '', 'servers' : self.returnlist})
 
     @cherrypy.expose
-    def perform_heartbeat(self, port):
+    def perform_heartbeat(self, port, playercount):
         for server in self.serverlist:
             if (server.ip == cherrypy.request.remote.ip and server.port == port):
                 server.timeoflastheartbeat = int(time.time())
+                server.playercount = playercount
 
 
 
