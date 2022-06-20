@@ -57,9 +57,9 @@ class MasterServer(object):
             sleep(1)
             
     @cherrypy.expose
-    def register_server(self, name, port, map, maxplayers, pwprotected, gamemode):
+    def register_server(self, name, port, map, maxplayers, pwprotected, gamemode, version, dedicated):
         if self.server_exists(cherrypy.request.remote.ip, port):
-            self.internal_update_server(cherrypy.request.remote.ip, port, name, map, 0, maxplayers, pwprotected, gamemode)
+            self.internal_update_server(cherrypy.request.remote.ip, port, name, map, 0, maxplayers, pwprotected, gamemode, version, dedicated)
             return json.dumps({'error' : False, 'message' : 'Sucessfully updated your server [%s %s:%s] on the server browser.' % (name, cherrypy.request.remote.ip, port)})
         else:
             server = Server()
@@ -71,6 +71,8 @@ class MasterServer(object):
             server.pwprotected = pwprotected
             server.gamemode = gamemode
             server.timeoflastheartbeat = int(time.time())
+            server.version = version
+            server.dedicated = dedicated
             """
             try:
                 r = requests.get('http://' + cherrypy.request.remote.ip + ':' + port, timeout=2)
@@ -86,7 +88,7 @@ class MasterServer(object):
             return json.dumps({'error' : False, 'message' : 'Sucessfully added your server [%s %s:%s] to the server browser.' % (name, cherrypy.request.remote.ip, port), 'heartbeat' : self.time_between_heartbeats })
 
 
-    def internal_update_server(self, ip, port, name, map, playercount, maxplayers, pwprotected, gamemode):
+    def internal_update_server(self, ip, port, name, map, playercount, maxplayers, pwprotected, gamemode, version, dedicated):
         for server in self.serverlist:
             if server.ip == ip and server.port == port: 
                 server.name = name
@@ -96,12 +98,14 @@ class MasterServer(object):
                 server.pwprotected = pwprotected
                 server.gamemode = gamemode
                 server.timeoflastheartbeat = int(time.time())
+                server.version = version
+                server.dedicated = dedicated
                 return True
         return False
 
     @cherrypy.expose
-    def update_server(self, port, name, map, playercount, maxplayers, pwprotected, gamemode):
-        if self.internal_update_server(cherrypy.request.remote.ip, port, name, map, playercount, maxplayers, pwprotected, gamemode):
+    def update_server(self, port, name, map, playercount, maxplayers, pwprotected, gamemode, version, dedicated):
+        if self.internal_update_server(cherrypy.request.remote.ip, port, name, map, playercount, maxplayers, pwprotected, gamemode, version, dedicated):
             return json.dumps({'error' : False, 'message' : 'Sucessfully updated your server [%s %s:%s] on the server browser.' % (name, cherrypy.request.remote.ip, port)})
         return json.dumps({'error' : True, 'message' : 'Server not registered'})
          
@@ -122,7 +126,7 @@ class MasterServer(object):
     def get_serverlist(self):
         self.returnlist = []
         for server in self.serverlist:
-            jsonstring = {'name' : server.name, 'port' : server.port, 'map' : server.map, 'playercount' : server.playercount, 'maxplayers' : server.maxplayers, 'pwprotected' : server.pwprotected, 'gamemode' : server.gamemode, 'ip' : server.ip }
+            jsonstring = {'name' : server.name, 'port' : server.port, 'map' : server.map, 'playercount' : server.playercount, 'maxplayers' : server.maxplayers, 'pwprotected' : server.pwprotected, 'gamemode' : server.gamemode, 'ip' : server.ip, 'server' : server.version, 'dedicated' : server.dedicated }
             self.returnlist.append(jsonstring)
         return json.dumps({'error' : False, 'message' : '', 'servers' : self.returnlist})
 
